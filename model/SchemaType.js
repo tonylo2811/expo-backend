@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const SchemaType = mongoose.Schema.Types;
+const SchemaTypes = mongoose.Schema.Types;
 
 //add object, boolean, array, date?
 module.exports = {

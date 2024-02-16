@@ -1,13 +1,17 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const compression = require('compression');
+app.use(compression());
 
 const {mongoose} = require('./config');
-
+const {User, Garment} = require('./model');
 const {venvSetup, pyInstall} = require('./helpers');
 
 var cors = require('cors');
 
+const path = require('path');
+process.env['U2NET_HOME'] = path.join(__dirname, 'u2net');
 // change to https
 // var https = require('https');
 // const fs = require('fs');
@@ -31,10 +35,14 @@ db.on('error',(err)=>{
     console.log(err);
 })
 
-db.once('open', async ()=>{
+db.on('open', async ()=>{
     console.log('DB running!');
-
-    //create Python venv and library check, comment out if already done
+    //test DB connection
+    let founduser = await User.findOne({'email':'test@gmail.com'})
+    console.log('founduser: ', founduser)
+    console.log('DB test success!');
+    
+    //create Python venv and check able to run the Python script or not, comment out if already done
     venvSetup(()=>pyInstall());
 })
 
@@ -69,6 +77,15 @@ app.use(bodyParser.urlencoded({
 }))
 
 app.use(express.json());
+
+app.get('/api/garments', (req, res) => {
+    Garment.find()
+      .then(garments => {
+        //console.log(garments); // Print garments to the console
+        res.json(garments);
+      })
+      .catch(err => res.status(500).json({ error: err }));
+  });
 
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
